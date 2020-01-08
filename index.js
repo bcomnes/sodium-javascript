@@ -1789,6 +1789,19 @@ function crypto_box_seal_open(m, c, pk, sk) {
   return crypto_secretbox_open_easy(m, c.subarray(epk.length), n, k)
 }
 
+function crypto_kx_keypair(pk, sk) {
+  check(pk, crypto_kx_PUBLICKEYBYTES)
+  check(sk, crypto_kx_SECRETKEYBYTES)
+  randombytes(sk, 32)
+  return crypto_scalarmult_base(pk, sk)
+}
+
+function crypto_kx_seed_keypair (pk, sk, seed) {
+  check(seed, sodium.crypto_kx_SEEDBYTES)
+  seed.copy(sk)
+  crypto_sign_keypair(pk, sk, true)
+}
+
 var crypto_secretbox_KEYBYTES = 32,
     crypto_secretbox_NONCEBYTES = 24,
     crypto_secretbox_ZEROBYTES = 32,
@@ -1807,11 +1820,23 @@ var crypto_secretbox_KEYBYTES = 32,
     crypto_sign_PUBLICKEYBYTES = 32,
     crypto_sign_SECRETKEYBYTES = 64,
     crypto_sign_SEEDBYTES = 32,
-    crypto_hash_BYTES = 64;
+    crypto_hash_BYTES = 64,
+    crypto_aead_xchacha20poly1305_ietf_ABYTES = 16,
+    crypto_aead_xchacha20poly1305_ietf_KEYBYTES = 32,
+    crypto_aead_xchacha20poly1305_ietf_MESSAGEBYTES_MAX = 9007199254740991,
+    crypto_aead_xchacha20poly1305_ietf_NPUBBYTES = 24,
+    crypto_aead_xchacha20poly1305_ietf_NSECBYTES = 0,
+    crypto_kx_PRIMITIVE = 'x25519blake2b',
+    crypto_kx_PUBLICKEYBYTES = 32,
+    crypto_kx_SECRETKEYBYTES = 32,
+    crypto_kx_SEEDBYTES = 32,
+    crypto_kx_SESSIONKEYBYTES = 32;
 
 sodium.memzero = function (len, offset) {
   for (var i = offset; i < len; i++) arr[i] = 0;
 }
+
+sodium.sodium_memzero = sodium.memzero
 
 sodium.crypto_sign_BYTES = crypto_sign_BYTES
 sodium.crypto_sign_PUBLICKEYBYTES = crypto_sign_PUBLICKEYBYTES
@@ -1850,6 +1875,21 @@ sodium.crypto_box_BEFORENMBYTES = crypto_box_BEFORENMBYTES
 sodium.crypto_box_keypair = crypto_box_keypair
 sodium.crypto_box_seal = crypto_box_seal
 sodium.crypto_box_seal_open = crypto_box_seal_open
+
+sodium.crypto_aead_xchacha20poly1305_ietf_ABYTES = crypto_aead_xchacha20poly1305_ietf_ABYTES
+sodium.crypto_aead_xchacha20poly1305_ietf_KEYBYTES = crypto_aead_xchacha20poly1305_ietf_KEYBYTES
+sodium.crypto_aead_xchacha20poly1305_ietf_MESSAGEBYTES_MAX = crypto_aead_xchacha20poly1305_ietf_MESSAGEBYTES_MAX
+sodium.crypto_aead_xchacha20poly1305_ietf_NPUBBYTES = crypto_aead_xchacha20poly1305_ietf_NPUBBYTES
+sodium.crypto_aead_xchacha20poly1305_ietf_NSECBYTES = crypto_aead_xchacha20poly1305_ietf_NSECBYTES
+
+sodium.crypto_kx_PRIMITIVE = crypto_kx_PRIMITIVE
+sodium.crypto_kx_PUBLICKEYBYTES = crypto_kx_PUBLICKEYBYTES
+sodium.crypto_kx_SECRETKEYBYTES = crypto_kx_SECRETKEYBYTES
+sodium.crypto_kx_SEEDBYTES = crypto_kx_SEEDBYTES
+sodium.crypto_kx_SESSIONKEYBYTES = crypto_kx_SESSIONKEYBYTES
+sodium.crypto_kx_keypair = crypto_kx_keypair
+
+sodium.sodium_malloc = Buffer.alloc
 
 function cleanup(arr) {
   for (var i = 0; i < arr.length; i++) arr[i] = 0;
